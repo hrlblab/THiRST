@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use THiRST, please cite the paper below."
+title: "THiRST: Computer Vision Empowered Three-Dimensional High-Resolution Spatial Transcriptomics Analytics"
+repository-code: "https://github.com/hrlblab/THiRST"
+license: GPL-2.0
+authors:
+  - {family-names: Zhu, given-names: Junchao}
+  - {family-names: Wang, given-names: Yu}
+  - {family-names: Lu, given-names: Zhengyi}
+  - {family-names: Qu, given-names: Chongyu}
+  - {family-names: Zhu, given-names: Yanfan}
+  - {family-names: Yang, given-names: Yuechen}
+  - {family-names: Zhao, given-names: Shilin}
+  - {family-names: Yang, given-names: Haichun}
+  - {family-names: Huo, given-names: Yuankai}
+  - {family-names: Deng, given-names: Ruining}
+preferred-citation:
+  type: conference-paper
+  title: "THiRST: Computer Vision Empowered Three-Dimensional High-Resolution Spatial Transcriptomics Analytics"
+  collection-title: "IEEE International Symposium on Biomedical Imaging (ISBI)"
+  year: 2027
+  authors:
+    - {family-names: Zhu, given-names: Junchao}
+    - {family-names: Wang, given-names: Yu}
+    - {family-names: Lu, given-names: Zhengyi}
+    - {family-names: Qu, given-names: Chongyu}
+    - {family-names: Zhu, given-names: Yanfan}
+    - {family-names: Yang, given-names: Yuechen}
+    - {family-names: Zhao, given-names: Shilin}
+    - {family-names: Yang, given-names: Haichun}
+    - {family-names: Huo, given-names: Yuankai}
+    - {family-names: Deng, given-names: Ruining}

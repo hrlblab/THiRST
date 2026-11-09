@@ -1,0 +1,101 @@
+# THiRST configuration -- one file per serial-section stack (tissue block).
+#
+# Every script takes `--config <this file>`. Relative paths are resolved against the directory
+# you run the scripts from (normally the repository root). See docs/PIPELINE.md for the folder
+# layout and the file naming conventions.
+
+paths:
+  # ---------------------------------------------------------------- raw inputs
+  # Whole-slide images named <case>-<section>.svs, e.g. CASE-01-1.svs ... CASE-01-12.svs.
+  # Pyramid level 2 must be a 4x downsample of level 0 (the scripts read level 2 and divide by 4).
+  wsi_dir: data/WSI
+  # One QuPath GeoJSON per WSI (*<case>-<section>.svs.geojson) with a polygon of class `region_class`
+  # delineating the tissue that is analysed on that section.
+  region_annotation_dir: data/WSI_json
+  # Omni-Seg segmentation after QA in QuPath, one GeoJSON per WSI: <case>-<section>.svs.geojson
+  # (full-resolution coordinates; classes as listed in `object_classes`).
+  object_annotation_dir: data/Omni-Seg/annotation_QA/geojson
+
+  # ---------------------------------------------------------------- working folders
+  # Keep these three as separate sibling folders; the scripts derive one from the other by
+  # replacing the root, so none of them may be nested inside another.
+  image_root: data/WSI_png            # <case>/image_<section>_<x0>_<y0>.png (+ registration outputs)
+  point_root: data/WSI_png_point      # <case>/image_<section>_<x0>_<y0>_center.csv (ST unit centres)
+  contour_root: data/WSI_png_contour  # <case>/image_<section>_<x0>_<y0>_spot.csv (ST unit polygons) + object/IoU outputs
+
+  # ---------------------------------------------------------------- third-party tools
+  # Folder containing antsRegistrationSyN.sh and ConvertImagePixelType. Leave empty to use $ANTSPATH or PATH.
+  ants_bin: /opt/ANTs/bin
+
+# Which XFeat to run (scripts/1_registration/xfeat_affine.py). The two lines below are the release
+# configuration: the code of commit e92685f of verlab/accelerated_features (fetched by torch.hub) and the
+# SHA-256 of the weights its torch.hub entry point downloads; the run stops if the weights differ.
+# Instead of owner/repo:<commit> you can give the path of a local git clone (checked out at that commit).
+# Without xfeat_hub, torch.hub runs the unpinned default branch. The weights are always downloaded from
+# the repository's main branch into $TORCH_HOME/hub/checkpoints/ (default ~/.cache/torch/hub/checkpoints/);
+# torch.hub reuses a file already there. Each run writes <image_root>/xfeat_provenance_<level>.json
+# (source, ref, git commit, SHA-256 of the code files and of the weights, torch version).
+xfeat_hub: verlab/accelerated_features:e92685f57f8318b18725c5c8c0bd28c7fe188d9a
+xfeat_weights_sha256: 0f5187fd7bedd26c7fe6acc9685444493a165a35ecc087b33c2db3627f3ea10b
+
+# Optional: restrict every script to these case folders (default: all folders in image_root).
+cases: []
+
+# Class name of the tissue-region polygon in region_annotation_dir.
+region_class: normal
+
+# Omni-Seg classes that are reconstructed in 3D (the paper tracks glomeruli through their capsule).
+object_classes: [capsule]
+
+# --------------------------------------------------------------------------------------------
+# Spatial transcriptomics of every section, keyed by the section index used in the WSI file names.
+# The analysis scripts assume Visium V2 and Visium HD sections alternate (V2 on odd, HD on even
+# positions of the stack), as in the paper.
+#   platform             visium_v2 (55 um spots, tissue_positions.csv) or
+#                        visium_hd (8 um bins, binned_outputs/square_008um/spatial/tissue_positions.parquet)
+#   positions            Space Ranger tissue_positions with pxl_row/col_in_fullres in the WSI's
+#                        full-resolution pixel frame
+#   in_tissue_positions  optional; table that provides the in_tissue flag when `positions` was
+#                        re-mapped to the WSI frame (default: `positions`)
+#   sample               optional; sample name used in the merged expression matrix / clustering
+#                        (barcodes "<sample>-8-<barcode>"); needed by scripts/5_object_analysis
+# --------------------------------------------------------------------------------------------
+st_sections:
+  1:  {platform: visium_v2, sample: S01, positions: data/SpaceRanger/S01/outs/spatial/tissue_positions.csv}
+  2:  {platform: visium_hd, sample: S02, positions: data/SpaceRanger/S02/outs/binned_outputs/square_008um/spatial/tissue_positions.parquet}
+  3:  {platform: visium_v2, sample: S03, positions: data/SpaceRanger/S03/outs/spatial/tissue_positions.csv}
+  4:  {platform: visium_hd, sample: S04, positions: data/SpaceRanger/S04/outs/binned_outputs/square_008um/spatial/tissue_positions.parquet}
+  5:  {platform: visium_v2, sample: S05, positions: data/SpaceRanger/S05/outs/spatial/tissue_positions.csv}
+  6:  {platform: visium_hd, sample: S06, positions: data/SpaceRanger/S06/outs/binned_outputs/square_008um/spatial/tissue_positions.parquet}
+  7:  {platform: visium_v2, sample: S07, positions: data/SpaceRanger/S07/outs/spatial/tissue_positions.csv}
+  8:  {platform: visium_hd, sample: S08, positions: data/SpaceRanger/S08/outs/binned_outputs/square_008um/spatial/tissue_positions.parquet}
+  9:  {platform: visium_v2, sample: S09, positions: data/SpaceRanger/S09/outs/spatial/tissue_positions.csv}
+  10: {platform: visium_hd, sample: S10, positions: data/SpaceRanger/S10/outs/binned_outputs/square_008um/spatial/tissue_positions.parquet}
+  11: {platform: visium_v2, sample: S11, positions: data/SpaceRanger/S11/outs/spatial/tissue_positions.csv}
+  12: {platform: visium_hd, sample: S12, positions: data/SpaceRanger/S12/outs/binned_outputs/square_008um/spatial/tissue_positions.parquet}
+  # Example of a section whose positions were re-mapped to the WSI frame:
+  # 1: {platform: visium_v2, sample: S01,
+  #     positions: data/SpaceRanger/S01/outs/spatial_wsi/tissue_positions.csv,
+  #     in_tissue_positions: data/SpaceRanger/S01/outs/spatial/tissue_positions.csv}
+
+# --------------------------------------------------------------------------------------------
+# External inputs of scripts/5_object_analysis (only needed for those scripts).
+# Every value under `analysis:` is a file path.
+# --------------------------------------------------------------------------------------------
+analysis:
+  hd_expression_mtx: data/analysis/hd_normalized_variable_features.mtx  # Matrix Market, genes x bins
+  hd_barcodes_csv: data/analysis/hd_cell_barcodes.csv                   # one barcode per line, no header ("<sample>-8-<barcode>")
+  hd_genes_csv: data/analysis/hd_variable_features.csv                  # one gene per line, no header
+  marker_gene_list_csv: data/analysis/marker_genes.csv                  # column `marker_gene_column`
+  clustering_meta_csv: data/analysis/visium_hd_meta.csv                 # columns Sample, Barcode, seurat_cluster.projected
+
+# Column of marker_gene_list_csv that lists the genes to map (gene_maps_per_track.py).
+marker_gene_column: suggested glom enricheed genes
+
+# Projected Seurat cluster IDs drawn as QuPath boxes (class name -> cluster IDs).
+cell_clusters_per_track:      # qupath_cells_by_cluster.py
+  podocyte: [35, 36, 37]
+  mesangial cell: [7]
+cell_clusters_all:            # qupath_all_cells_by_cluster.py
+  podocyte: [2]
+  mesangial cell: [7]

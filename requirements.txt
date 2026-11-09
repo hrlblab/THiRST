@@ -1,0 +1,20 @@
+# THiRST - Python dependencies (tested with Python 3.13, pandas 2.2 and 3.0)
+numpy>=1.21
+pandas>=1.3
+scipy>=1.7
+scikit-image>=0.19
+opencv-python>=4.5.1       # cv2.USAC_MAGSAC
+shapely>=2.0               # vectorised polygons, contains_xy
+SimpleITK>=2.0
+openslide-python>=1.4          # picks up openslide-bin automatically
+openslide-bin              # OpenSlide C library (or install libopenslide from your OS)
+matplotlib>=3.4
+joblib>=1.0
+pyyaml>=5.4
+pyarrow>=7.0               # Visium HD tissue_positions.parquet
+fastparquet                # used first when present
+torch>=1.10                # XFeat via torch.hub (verlab/accelerated_features)
+tqdm                       # imported by XFeat's modules/xfeat.py
+tifffile                   # demo data only
+# ANTs (antsRegistrationSyN.sh, ConvertImagePixelType) is a separate install:
+#   https://github.com/ANTsX/ANTs/releases  or  conda install -c conda-forge ants  (tested: ANTs 2.6.5)

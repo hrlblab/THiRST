@@ -1,0 +1,10 @@
+name: thirst
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - -r requirements.txt
+# ANTs is installed separately: `conda install -c conda-forge ants` (tested: ANTs 2.6.5) or
+# https://github.com/ANTsX/ANTs/releases; then set `paths.ants_bin` in the config (or export ANTSPATH).
